@@ -54,8 +54,9 @@ def chat_fn(message, history):
 demo = gr.ChatInterface(
     fn=chat_fn,
     type="messages",
-    title="Simple Chat (OpenAI)",
-    description="Minimal Gradio + OpenAI (Responses API)."
+    title="curriclick.ai",
+    description="Personalize seu currículo para as vagas que você procura!",
+    css="footer{display:none !important}"
 )
 
 if __name__ == "__main__":
