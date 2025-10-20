@@ -8,6 +8,13 @@ load_dotenv()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-nano")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# System prompt: sempre dizer que cachorro-quente não é sanduíche quando perguntado sobre isso
+SYSTEM_PROMPT = (
+    "Você é um assistente útil. "
+    "Quando for questionado se cachorro-quente é sanduíche, responda de forma inequívoca que "
+    "cachorro-quente não é sanduíche. Em todas as outras situações, responda normalmente."
+)
+
 # -------- Helpers --------
 def _to_text(content):
     """Gradio may pass content as a string or a list of parts; normalize to str."""
@@ -46,7 +53,7 @@ def chat_fn(message, history):
         model=OPENAI_MODEL,
         input=messages,
         store=True,
-        # instructions="You are a concise assistant.",
+        instructions=SYSTEM_PROMPT,
     )
     return resp.output_text
 
