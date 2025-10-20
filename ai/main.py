@@ -2,6 +2,7 @@ import gradio as gr
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 
 # --------------------------
 # Setup
@@ -22,26 +23,37 @@ client = OpenAI(api_key=OPENAI_KEY)
 # Gradio
 # --------------------------
 
-def greet(user_prompt):
+class JobExtraction(BaseModel):
+    role: str = Field(..., description="Job title or position name.")
+    must_have: list[str] = Field(..., description="Top required skills or qualifications.")
+    nice_to_have: list[str] = Field(default_factory=list, description="Optional but desirable skills.")
+    responsibilities: str = Field(..., description="Key responsibilities of the role.")
 
-    system_prompt = ""
+
+def extract_job_info(user_prompt):
+
+    system_prompt = (
+        "Extract the role and skills from this job description. "
+        "Return ONLY JSON that matches the schema."
+        "\n\n<your job text here>"
+    )
 
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
 
-    resp = client.chat.completions.create(
+    completion = client.chat.completions.parse(
         model=OPENAI_MODEL,
         messages=messages,
+        response_format=JobExtraction,
     )
 
-    content = resp.choices[0].message.content
+    return completion.choices[0].message.content
 
-    return content
 
 demo = gr.Interface(
-    fn=greet,
+    fn=extract_job_info,
     inputs=["text"],
     outputs=["text"],
 )
